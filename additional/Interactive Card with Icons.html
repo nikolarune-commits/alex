@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)https://cardswingmen.space/utility.html -->
+<html lang="ka"><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/content/location/location.js" id="eppiocemhmnlbhjplcgkofciiegomcon"></script><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/extend-native-history-api.js"></script><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js"></script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>Interactive Card with Icons</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="./Interactive Card with Icons_files/all.min.css" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --accent:#ffd200;
+      --muted:#ddd;
+      --card-size:320px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--muted);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background: rgb(0, 0, 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      z-index: 5;
+      box-sizing: border-box;
+    }
+    .menu-wrapper { display: flex; align-items: center; gap: 60px; }
+    .menu-left, .menu-right { display: flex; gap: 20px; }
+    .logo-center { height: 70px; }
+    .menu-left a, .menu-right a {
+      color: white; text-decoration: none; font-weight: bold; font-size: 0.8rem;
+      padding: 5px 10px; border-radius: 5px; transition: background 0.3s;
+    }
+    .menu-left a:hover, .menu-right a:hover { color: rgb(255, 196, 0); }
+    .stage {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+      flex-direction: column;
+      gap: 30px;
+      background: linear-gradient(to bottom, rgb(0, 0, 0), rgba(0,0,0,0)) ,
+                  url('/images/utilitybg.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .card-wrap{ position:relative; width:var(--card-size); height:var(--card-size);
+      display:flex; align-items:center; justify-content:center; z-index:2; margin-top: 80px;}
+    .card{ width:100%; height:100%; border-radius:16px; overflow:hidden;
+      display:flex; align-items:center; justify-content:center; }
+    .card img{ width:92%; height:auto; display:block; border-radius:10px; }
+    .ring{ position:absolute; width:520px; height:520px; border-radius:50%;
+      z-index:1; pointer-events:none; }
+    .icon{
+      position:absolute; width:64px; height:64px; border-radius:50%;
+      background:#111; display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+      border: 2px solid rgba(255,255,255,0.04);
+      cursor:pointer; transform: translateY(20px) scale(.8);
+      opacity:0; pointer-events:auto;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s;
+      color:#fff; font-size:22px;
+    }
+    .icon:hover{
+      transform: translateY(0) scale(1.05);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.7);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,210,0,0.05));
+    }
+    .icon.pos-top      { top: -30px; left: calc(50% - 32px); }
+    .icon.pos-right1   { top: 40px; right: -70px; }
+    .icon.pos-right2   { bottom: 40px; right: -70px; }
+    .icon.pos-left1    { top: 40px; left: -70px; }
+    .icon.pos-left2    { bottom: 40px; left: -70px; }
+    .icon.pos-bottom   { bottom: -30px; left: calc(50% - 32px); }
+    @keyframes popIn {
+      0% { transform: translateY(20px) scale(.85); opacity:0; }
+      60% { transform: translateY(-6px) scale(1.03); opacity:1; }
+      100% { transform: translateY(0) scale(1); opacity:1; }
+    }
+    .icon.animate { animation: popIn .6s cubic-bezier(.2,.9,.2,1) forwards; }
+    .info-global{
+      max-width:700px; text-align:center; font-size:1.1rem; line-height:1.5;
+      color:#fff; min-height:60px; transition:opacity .25s ease; opacity:0;
+    }
+    .info-global.show{ opacity:1; }
+  </style>
+<script bis_use="true" type="text/javascript" charset="utf-8" data-bis-config="[&quot;facebook.com/&quot;,&quot;twitter.com/&quot;,&quot;youtube-nocookie.com/embed/&quot;,&quot;//vk.com/&quot;,&quot;//www.vk.com/&quot;,&quot;linkedin.com/&quot;,&quot;//www.linkedin.com/&quot;,&quot;//instagram.com/&quot;,&quot;//www.instagram.com/&quot;,&quot;//www.google.com/recaptcha/api2/&quot;,&quot;//hangouts.google.com/webchat/&quot;,&quot;//www.google.com/calendar/&quot;,&quot;//www.google.com/maps/embed&quot;,&quot;spotify.com/&quot;,&quot;soundcloud.com/&quot;,&quot;//player.vimeo.com/&quot;,&quot;//disqus.com/&quot;,&quot;//tgwidget.com/&quot;,&quot;//js.driftt.com/&quot;,&quot;friends2follow.com&quot;,&quot;/widget&quot;,&quot;login&quot;,&quot;//video.bigmir.net/&quot;,&quot;blogger.com&quot;,&quot;//smartlock.google.com/&quot;,&quot;//keep.google.com/&quot;,&quot;/web.tolstoycomments.com/&quot;,&quot;moz-extension://&quot;,&quot;chrome-extension://&quot;,&quot;/auth/&quot;,&quot;//analytics.google.com/&quot;,&quot;adclarity.com&quot;,&quot;paddle.com/checkout&quot;,&quot;hcaptcha.com&quot;,&quot;recaptcha.net&quot;,&quot;2captcha.com&quot;,&quot;accounts.google.com&quot;,&quot;www.google.com/shopping/customerreviews&quot;,&quot;buy.tinypass.com&quot;,&quot;gstatic.com&quot;,&quot;secureir.ebaystatic.com&quot;,&quot;docs.google.com&quot;,&quot;contacts.google.com&quot;,&quot;github.com&quot;,&quot;mail.google.com&quot;,&quot;chat.google.com&quot;,&quot;audio.xpleer.com&quot;,&quot;keepa.com&quot;,&quot;static.xx.fbcdn.net&quot;,&quot;sas.selleramp.com&quot;,&quot;1plus1.video&quot;,&quot;console.googletagservices.com&quot;,&quot;//lnkd.demdex.net/&quot;,&quot;//radar.cedexis.com/&quot;,&quot;//li.protechts.net/&quot;,&quot;challenges.cloudflare.com/&quot;,&quot;ogs.google.com&quot;,&quot;//www.ukrnafta.com/data/map/&quot;,&quot;//maps.google.com/maps&quot;,&quot;//www.openstreetmap.org/export/embed.html&quot;,&quot;//www.google.com/maps/d/u/3/embed&quot;]" data-dynamic-id="f244d20c-e28b-44c9-9224-bd14b032c761" src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/executors/200.js"></script><script bis_use="true" type="text/javascript" charset="utf-8" nonce="" data-dynamic-id="f244d20c-e28b-44c9-9224-bd14b032c761" src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/executors/101.js"></script></head>
+<body __processed_9b984edf-1c58-4f99-84dc-f1ea79f45764__="true" bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJlbmFibGVkIiwiRkFDRUJPT0siOiJlbmFibGVkIiwiVFdJVFRFUiI6ImVuYWJsZWQiLCJSRURESVQiOiJlbmFibGVkIiwiUElOVEVSRVNUIjoiZW5hYmxlZCIsIklOU1RBR1JBTSI6ImVuYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZW5hYmxlZCIsIkNPTkZJRyI6ImRpc2FibGVkIn0sInZlcnNpb24iOiIyLjAuNDQiLCJzY29yZSI6MjAwNDQwfV0=">
+ <div class="top-bar" bis_skin_checked="1">
+    <div class="menu-wrapper" bis_skin_checked="1">
+      <div class="menu-left" bis_skin_checked="1">
+        <a href="https://cardswingmen.space/index.html" bis_skin_checked="1">HOME</a>
+        <a href="https://cardswingmen.space/about.html" bis_skin_checked="1">ABOUT</a>
+      </div>
+      <img src="./Interactive Card with Icons_files/logo.webp" alt="Logo" class="logo-center">
+      <div class="menu-right" bis_skin_checked="1">
+        <a href="https://cardswingmen.space/utility.html" bis_skin_checked="1">UTILITY</a>
+        <a href="https://cardswingmen.space/utility.html#">WHITEPAPER</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage" bis_skin_checked="1">
+    <div class="card-wrap" id="cardWrap" bis_skin_checked="1">
+      <div class="ring" bis_skin_checked="1"></div>
+      <div class="card" bis_skin_checked="1">
+        <img src="./Interactive Card with Icons_files/card.webp" alt="Card image">
+      </div>
+      <button class="icon pos-top animate" data-info="The card empowers the community by bringing members together as a family, with each member receiving both an NFT and a physical card that unlocks exclusive privileges and opportunities." style="animation-delay:0.15s"><i class="fa-solid fa-heart"></i></button>
+      <button class="icon pos-right1 animate" data-info="A card is required to claim any newly released gifts or IRL items, allowing the item&#39;s price to be reduced to $0." style="animation-delay:0.30s"><i class="fa-solid fa-gift"></i></button>
+      <button class="icon pos-right2 animate" data-info="Cardholders have the privilege to submit requests for roles as actors or for any other positions, with their applications receiving priority consideration." style="animation-delay:0.45s"><i class="fa-solid fa-film"></i></button>
+      <button class="icon pos-left1 animate" data-info="An IP license for all soundtracks used in the WINGMEN series, granting you full and unrestricted rights to use them at your discretion." style="animation-delay:0.60s"><i class="fa-solid fa-music"></i></button>
+      <button class="icon pos-left2 animate" data-info="The card can be used as a credit card, and at our special launches and events, you are authorized to use your WMC coins through this card." style="animation-delay:0.75s"><i class="fa-solid fa-credit-card"></i></button>
+      <button class="icon pos-bottom animate" data-info="Cardholders will earn WMC coins through airdrops, proportional to their engagement and activity within the community." style="animation-delay:0.90s"><i class="fa-solid fa-coins"></i></button>
+    </div>
+    <div class="info-global" id="infoGlobal" bis_skin_checked="1"></div>
+  </div>
+
+  <script>
+    const icons = document.querySelectorAll('.icon');
+    const infoGlobal = document.getElementById('infoGlobal');
+
+    icons.forEach((ic) => {
+      setTimeout(()=> ic.classList.add('animate'), 50);
+    });
+
+    function showInfo(txt){
+      infoGlobal.textContent = txt;
+      infoGlobal.classList.add('show');
+    }
+    function hideInfo(){
+      infoGlobal.classList.remove('show');
+      setTimeout(()=>{ if(!infoGlobal.classList.contains('show')) infoGlobal.textContent=''; }, 200);
+    }
+
+    icons.forEach(icon=>{
+      icon.addEventListener('mouseenter', ()=> showInfo(icon.dataset.info));
+      icon.addEventListener('mouseleave', hideInfo);
+      icon.addEventListener('focus', ()=> showInfo(icon.dataset.info));
+      icon.addEventListener('blur', hideInfo);
+      icon.addEventListener('click', ()=> showInfo(icon.dataset.info));
+    });
+  </script>
+
+
+</body></html>

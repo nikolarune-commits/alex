@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<!-- saved from url=(0027)https://cardswingmen.space/ -->
+<html lang="en"><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/content/location/location.js" id="eppiocemhmnlbhjplcgkofciiegomcon"></script><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/extend-native-history-api.js"></script><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js"></script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>Fixed Background Scroll</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 1500vh;
+      overflow-x: hidden;
+      background: black;
+      font-family: sans-serif;
+      color: white;
+    }
+    .long-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+    }
+    .long-bg img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: auto;
+      min-height: 300vh;
+    }
+    .bg-image {
+      position: fixed;
+      width: 80px;
+      height: auto;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+    }
+    .bg-image.visible {
+      opacity: 1;
+    }
+    .card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 400px;
+      height: 270px;
+      perspective: 1000px;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.05s linear;
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      background-size: cover;
+      background-position: center;
+      backface-visibility: hidden;
+    }
+    .card-front {
+      background-image: url('/images/card.jpg');
+    }
+    .card-back {
+      background-image: url('/images/card2.jpg');
+      transform: rotateY(180deg);
+    }
+    .text-section {
+      position: fixed;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.5s;
+      z-index: 1;
+      width: 40%;
+    }
+    .text-section .title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .text-section .description {
+      font-size: 1.3rem;
+      font-weight: 300;
+      line-height: 1.4;
+    }
+    .text-section.active {
+      opacity: 1;
+    }
+    .text-section.fadeout {
+      opacity: 0;
+    }
+    #text1 { left: 50%; top: 25%; transform: translateX(-50%); text-align: center; font-size: 2.2rem; font-weight: bold; opacity: 1; }
+    #text2 { left: 10%; top: 40%; text-align: left; }
+    #text3 { right: 10%; top: 40%; text-align: right; }
+    #text4 { left: 10%; top: 40%; text-align: left; }
+    #text5 { right: 10%; top: 70%; text-align: right; }
+    #text6 { left: 50%; top: 40%; text-align: right; }
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background: rgb(0, 0, 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      z-index: 5;
+      box-sizing: border-box;
+    }
+    .menu-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 60px;
+    }
+    .menu-left, .menu-right {
+      display: flex;
+      gap: 20px;
+    }
+    .logo-center {
+      height: 70px;
+    }
+    .menu-left a, .menu-right a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .menu-left a:hover, .menu-right a:hover {
+      color: rgb(255, 196, 0);
+    }
+    #watch-btn {
+      position: fixed;
+      top: calc(90% + 360px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      background-color: #FDC202;
+      color: black;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+    .video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .video-overlay.active {
+      display: flex;
+    }
+    .video-wrap {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .video-iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .video-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 10000;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    @media (max-width: 1440px) {
+      .card {
+        transform: translate(-50%, -50%) scale(0.9);
+        top: 60%;
+      }
+    }
+    @media (max-height: 900px) {
+      #watch-btn {
+        top: calc(80% + 300px);
+      }
+    }
+    .ticker-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgb(0, 0, 0);
+      overflow: hidden;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      z-index: 999;
+    }
+    .ticker {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker 30s linear infinite;
+    }
+    .ticker span {
+      padding: 0 2rem;
+      font-size: 0.7rem;
+      color: rgb(255, 221, 0);
+    }
+    @keyframes ticker {
+      0%   { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    @media (max-width: 768px) {
+  /* Card shrink */
+  .card {
+    width: 280px;
+    height: 190px;
+    transform: translate(-50%, -50%) scale(0.8);
+    top: 55%;
+  }
+
+  /* Text sections */
+  .text-section {
+    width: 80%;
+    font-size: 1rem;
+    text-align: center !important;
+    left: 50% !important;
+    transform: translateX(-50%);
+  }
+
+  .text-section .title {
+    font-size: 1.5rem;
+  }
+
+  .text-section .description {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  /* Trailer button */
+  #watch-btn {
+    font-size: 1rem;
+    padding: 10px 18px;
+    top: auto;
+    bottom: 15%;
+  }
+
+  /* Top navigation bar */
+  .top-bar {
+    height: 40px;
+    font-size: 0.7rem;
+  }
+  .menu-wrapper {
+    gap: 20px;
+  }
+  .menu-left, .menu-right {
+    gap: 10px;
+  }
+  .logo-center {
+    height: 40px;
+  }
+
+  /* Video iframe inside overlay */
+  .video-wrap {
+    width: 100%;
+    height: 60%;
+  }
+  .video-iframe {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Ticker smaller */
+  .ticker span {
+    font-size: 0.6rem;
+    padding: 0 1rem;
+  }
+}
+.mobile-message {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  body > *:not(.mobile-message) {
+    display: none !important;
+  }
+  .mobile-message {
+    display: block;
+  }
+  body {
+    background: black;
+  }
+}
+
+  </style>
+<script bis_use="true" type="text/javascript" charset="utf-8" data-bis-config="[&quot;facebook.com/&quot;,&quot;twitter.com/&quot;,&quot;youtube-nocookie.com/embed/&quot;,&quot;//vk.com/&quot;,&quot;//www.vk.com/&quot;,&quot;linkedin.com/&quot;,&quot;//www.linkedin.com/&quot;,&quot;//instagram.com/&quot;,&quot;//www.instagram.com/&quot;,&quot;//www.google.com/recaptcha/api2/&quot;,&quot;//hangouts.google.com/webchat/&quot;,&quot;//www.google.com/calendar/&quot;,&quot;//www.google.com/maps/embed&quot;,&quot;spotify.com/&quot;,&quot;soundcloud.com/&quot;,&quot;//player.vimeo.com/&quot;,&quot;//disqus.com/&quot;,&quot;//tgwidget.com/&quot;,&quot;//js.driftt.com/&quot;,&quot;friends2follow.com&quot;,&quot;/widget&quot;,&quot;login&quot;,&quot;//video.bigmir.net/&quot;,&quot;blogger.com&quot;,&quot;//smartlock.google.com/&quot;,&quot;//keep.google.com/&quot;,&quot;/web.tolstoycomments.com/&quot;,&quot;moz-extension://&quot;,&quot;chrome-extension://&quot;,&quot;/auth/&quot;,&quot;//analytics.google.com/&quot;,&quot;adclarity.com&quot;,&quot;paddle.com/checkout&quot;,&quot;hcaptcha.com&quot;,&quot;recaptcha.net&quot;,&quot;2captcha.com&quot;,&quot;accounts.google.com&quot;,&quot;www.google.com/shopping/customerreviews&quot;,&quot;buy.tinypass.com&quot;,&quot;gstatic.com&quot;,&quot;secureir.ebaystatic.com&quot;,&quot;docs.google.com&quot;,&quot;contacts.google.com&quot;,&quot;github.com&quot;,&quot;mail.google.com&quot;,&quot;chat.google.com&quot;,&quot;audio.xpleer.com&quot;,&quot;keepa.com&quot;,&quot;static.xx.fbcdn.net&quot;,&quot;sas.selleramp.com&quot;,&quot;1plus1.video&quot;,&quot;console.googletagservices.com&quot;,&quot;//lnkd.demdex.net/&quot;,&quot;//radar.cedexis.com/&quot;,&quot;//li.protechts.net/&quot;,&quot;challenges.cloudflare.com/&quot;,&quot;ogs.google.com&quot;,&quot;//www.ukrnafta.com/data/map/&quot;,&quot;//maps.google.com/maps&quot;,&quot;//www.openstreetmap.org/export/embed.html&quot;,&quot;//www.google.com/maps/d/u/3/embed&quot;]" data-dynamic-id="f244d20c-e28b-44c9-9224-bd14b032c761" src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/executors/200.js"></script><script bis_use="true" type="text/javascript" charset="utf-8" nonce="" data-dynamic-id="f244d20c-e28b-44c9-9224-bd14b032c761" src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/executors/101.js"></script></head>
+<body __processed_50f35225-51e2-4cc3-9844-887dc8bb77ef__="true" bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJlbmFibGVkIiwiRkFDRUJPT0siOiJlbmFibGVkIiwiVFdJVFRFUiI6ImVuYWJsZWQiLCJSRURESVQiOiJlbmFibGVkIiwiUElOVEVSRVNUIjoiZW5hYmxlZCIsIklOU1RBR1JBTSI6ImVuYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZW5hYmxlZCIsIkNPTkZJRyI6ImRpc2FibGVkIn0sInZlcnNpb24iOiIyLjAuNDQiLCJzY29yZSI6MjAwNDQwfV0=">
+  <div class="long-bg" bis_skin_checked="1">
+    <img src="./Fixed Background Scroll_files/bg.png" alt="Background Image">
+  </div>
+  <div class="mobile-message" bis_skin_checked="1">
+  <p>📱 Mobile version is under development.<br> Please visit wingmen.space.</p>
+</div>
+
+  <div class="card" bis_skin_checked="1">
+    <div class="card-inner" id="card" bis_skin_checked="1">
+      <div class="card-front" bis_skin_checked="1"></div>
+      <div class="card-back" bis_skin_checked="1"></div>
+    </div>
+  </div>
+  <section class="text-section" id="text1">
+    <div class="title" bis_skin_checked="1">WINGMEN</div>
+    <div class="description" bis_skin_checked="1">BEST WEB3 TV SERIES DRIVEN BY COMMUNITY</div>
+    <button id="watch-btn">TRAILER</button>
+  </section>
+  <section class="text-section" id="text2">
+    <div class="title" bis_skin_checked="1"></div>
+    <div class="description" bis_skin_checked="1"></div>
+  </section>
+  <section class="text-section" id="text3">
+    <div class="title" bis_skin_checked="1">VOTE SYSTEM</div>
+    <div class="description" bis_skin_checked="1">NFT holders can vote on the development of the storyline.</div>
+  </section>
+  <section class="text-section" id="text4">
+    <div class="title" bis_skin_checked="1">WMCoin</div>
+    <div class="description" bis_skin_checked="1">Your digital currency to unlock everything <br> within our universe.</div>
+  </section>
+  <section class="text-section" id="text5">
+    <div class="title" bis_skin_checked="1">TEAM</div>
+    <div class="description" bis_skin_checked="1">With 15 + Experience in filmmaker</div>
+  </section>
+  <section class="text-section" id="text6">
+    <div class="title" bis_skin_checked="1">ROADMAP</div>
+    <div class="description" bis_skin_checked="1"></div>
+  </section>
+  <div class="top-bar" bis_skin_checked="1">
+    <div class="menu-wrapper" bis_skin_checked="1">
+      <div class="menu-left" bis_skin_checked="1">
+        <a href="https://cardswingmen.space/index.html">HOME</a>
+        <a href="https://cardswingmen.space/about.html">ABOUT</a>
+      </div>
+      <img src="./Fixed Background Scroll_files/logo.webp" alt="Logo" class="logo-center">
+      <div class="menu-right" bis_skin_checked="1">
+        <a href="https://cardswingmen.space/utility.html">UTILITY</a>
+        <a href="https://cardswingmen.space/#">WHITEPAPER</a>
+      </div>
+    </div>
+  </div>
+  <div class="video-overlay" id="videoOverlay" aria-hidden="true" bis_skin_checked="1">
+    <div class="video-wrap" id="videoWrap" bis_skin_checked="1">
+      <button class="video-close" id="videoClose">Close ✕</button>
+    </div>
+  </div>
+  <h1 style="padding:50px"></h1>
+  <p style="padding:50px"></p>
+  <div class="ticker-wrapper" bis_skin_checked="1">
+    <div class="ticker" bis_skin_checked="1">
+      <span>🚀 Welcome to WINGMEN</span>
+      <span>🔥 Whitelist is live</span>
+      <span>⚡ Join our Discord</span>
+      <span>💎 Limited Supply</span>
+      <span>Please note: This is a preview version of our website and it is currently under construction</span>
+    </div>
+  </div>
+  <script>
+    const cardInner = document.getElementById('card');
+    const card = document.querySelector('.card');
+    const texts = document.querySelectorAll('.text-section');
+    const bg = document.querySelector('.long-bg');
+    const img = bg.querySelector('img');
+    const freezeZones = [
+      { start: 0.15, end: 0.35 },
+      { start: 0.40, end: 0.50 },
+      { start: 0.64, end: 0.80 },
+      { start: 0.90, end: 0.999 }
+    ];
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const progress = scrollTop / docHeight;
+      const imgHeight = img.offsetHeight;
+      const windowHeight = window.innerHeight;
+      const maxTranslate = imgHeight - windowHeight;
+      const translateY = -maxTranslate * progress;
+      bg.style.transform = `translateY(${translateY}px)`;
+      let inFreezeZone = false;
+      let freezeProgress = 0;
+      let transitionProgress = 0;
+      for (const zone of freezeZones) {
+        if (progress >= zone.start && progress <= zone.end) {
+          inFreezeZone = true;
+          const transitionStart = zone.end - 0.05;
+          if (progress > transitionStart) {
+            transitionProgress = (progress - transitionStart) / 0.05;
+          } else {
+            transitionProgress = 0;
+          }
+          freezeProgress = zone.start;
+          break;
+        }
+      }
+      let moveX, rotateY, rotateX, translateZ;
+      const amplitude = window.innerWidth < 1440 ? 600 : 900;
+      if (inFreezeZone) {
+        const moveX_frozen = Math.sin(freezeProgress * Math.PI * 4) * amplitude;
+        const rotateY_frozen = freezeProgress * 1000;
+        const rotateX_frozen = Math.sin(freezeProgress * Math.PI * 4) * 375;
+        const translateZ_frozen = -Math.abs(moveX_frozen) / 3;
+        const moveX_full = Math.sin(progress * Math.PI * 4) * amplitude;
+        const rotateY_full = progress * 1000;
+        const rotateX_full = Math.sin(progress * Math.PI * 4) * 375;
+        const translateZ_full = -Math.abs(moveX_full) / 3;
+        moveX = lerp(moveX_frozen, moveX_full, transitionProgress);
+        rotateY = lerp(rotateY_frozen, rotateY_full, transitionProgress);
+        rotateX = lerp(rotateX_frozen, rotateX_full, transitionProgress);
+        translateZ = lerp(translateZ_frozen, translateZ_full, transitionProgress);
+      } else {
+        moveX = Math.sin(progress * Math.PI * 4) * amplitude;
+        rotateY = progress * 1000;
+        rotateX = Math.sin(progress * Math.PI * 4) * 375;
+        translateZ = -Math.abs(moveX) / 3;
+      }
+      cardInner.style.transform = `translateZ(${translateZ}px) translateX(${moveX}px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+      if (progress >= 0.95) {
+        const fadeProgress = (progress - 0.99) / 0.01;
+        card.style.opacity = 1 - fadeProgress;
+        card.style.pointerEvents = 'none';
+      } else {
+        card.style.opacity = '1';
+        card.style.pointerEvents = 'auto';
+      }
+      const text1 = document.getElementById('text1');
+      const fadeOutProgress = Math.min(progress / 0.03, 1);
+      text1.style.opacity = 1 - fadeOutProgress;
+      texts.forEach((text, index) => {
+        if (index === 0) return;
+        const start = index / texts.length;
+        const end = (index + 1) / texts.length;
+        if (progress >= start && progress < end) {
+          text.classList.add('active');
+          text.classList.remove('fadeout');
+        } else {
+          text.classList.remove('active');
+          text.classList.add('fadeout');
+        }
+      });
+    });
+    const watchBtn = document.getElementById('watch-btn');
+    const overlay = document.getElementById('videoOverlay');
+    const wrap = document.getElementById('videoWrap');
+    const closeBtn = document.getElementById('videoClose');
+    const VIDEO_ID = 'LZw2DAgtnGE';
+    function createIframe(id) {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+      iframe.className = 'video-iframe';
+      iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('frameborder', '0');
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      return iframe;
+    }
+    function openVideoFullscreen() {
+      const existing = wrap.querySelector('iframe');
+      if (existing) existing.remove();
+      const iframe = createIframe(VIDEO_ID);
+      wrap.appendChild(iframe);
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
+      const el = overlay;
+      const requestFS = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+      if (requestFS) {
+        try { requestFS.call(el).catch(()=>{}); } catch(e){}
+      }
+    }
+    function closeVideo() {
+      const iframe = wrap.querySelector('iframe');
+      if (iframe) iframe.remove();
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+      const exitFS = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+      if (exitFS && (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement)) {
+        try { exitFS.call(document).catch(()=>{}); } catch(e){}
+      }
+    }
+    watchBtn.addEventListener('click', openVideoFullscreen);
+    closeBtn.addEventListener('click', closeVideo);
+    document.addEventListener('keydown', (e) => { if(e.key==='Escape') closeVideo(); });
+    document.addEventListener('fullscreenchange', ()=>{ if(!document.fullscreenElement && overlay.classList.contains('active')) closeVideo(); });
+    document.addEventListener('webkitfullscreenchange', ()=>{ if(!document.webkitFullscreenElement && overlay.classList.contains('active')) closeVideo(); });
+    document.addEventListener('mozfullscreenchange', ()=>{ if(!document.mozFullScreenElement && overlay.classList.contains('active')) closeVideo(); });
+    document.addEventListener('msfullscreenchange', ()=>{ if(!document.msFullscreenElement && overlay.classList.contains('active')) closeVideo(); });
+    const observer = new MutationObserver(()=>{ document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : ''; });
+    observer.observe(overlay, { attributes:true, attributeFilter:['class'] });
+  </script>
+
+
+</body></html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Utility — Wingmen</title>
+<link rel="icon" type="image/webp" href="./Fixed Background Scroll_files/logo.webp">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<style>
+  :root { --bg:#0b0b0b; --accent:#ffd200; --muted:#ddd; --card-size:320px; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: var(--bg); color: var(--muted); font-family: 'Inter', system-ui, sans-serif; }
+  .top-bar {
+    position: fixed; top: 0; left: 0; width: 100%; height: 50px;
+    background: rgb(0,0,0); display: flex; align-items: center;
+    justify-content: center; padding: 0; z-index: 5; box-sizing: border-box;
+  }
+  .menu-wrapper { display: flex; align-items: center; gap: 60px; }
+  .menu-left, .menu-right { display: flex; gap: 20px; }
+  .logo-center { height: 70px; }
+  .menu-left a, .menu-right a {
+    color: white; text-decoration: none; font-weight: bold; font-size: 0.8rem;
+    padding: 5px 10px; border-radius: 5px; transition: color 0.3s;
+  }
+  .menu-left a:hover, .menu-right a:hover { color: rgb(255,196,0); }
+  /* Desktop stage */
+  .stage {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 40px; position: relative; flex-direction: column; gap: 30px;
+    background: linear-gradient(to bottom, rgb(0,0,0), rgba(0,0,0,0)),
+                url('./images/utilitybg.png');
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+  }
+  .card-wrap { position: relative; width: var(--card-size); height: var(--card-size);
+    display: flex; align-items: center; justify-content: center; z-index: 2; margin-top: 80px; }
+  .card { width: 100%; height: 100%; border-radius: 16px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; }
+  .card img { width: 92%; height: auto; display: block; border-radius: 10px; }
+  .ring { position: absolute; width: 520px; height: 520px; border-radius: 50%; z-index: 1; pointer-events: none; }
+  .icon {
+    position: absolute; width: 64px; height: 64px; border-radius: 50%;
+    background: #111; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.04);
+    cursor: pointer; transform: translateY(20px) scale(.8); opacity: 0; pointer-events: auto;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s;
+    color: #fff; font-size: 22px;
+  }
+  .icon:hover { transform: translateY(0) scale(1.05); box-shadow: 0 14px 30px rgba(0,0,0,0.7);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,210,0,0.05)); }
+  .icon.pos-top { top: -30px; left: calc(50% - 32px); }
+  .icon.pos-right1 { top: 40px; right: -70px; }
+  .icon.pos-right2 { bottom: 40px; right: -70px; }
+  .icon.pos-left1 { top: 40px; left: -70px; }
+  .icon.pos-left2 { bottom: 40px; left: -70px; }
+  .icon.pos-bottom { bottom: -30px; left: calc(50% - 32px); }
+  @keyframes popIn {
+    0% { transform: translateY(20px) scale(.85); opacity: 0; }
+    60% { transform: translateY(-6px) scale(1.03); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  .icon.animate { animation: popIn .6s cubic-bezier(.2,.9,.2,1) forwards; }
+  .info-global {
+    max-width: 700px; text-align: center; font-size: 1.1rem; line-height: 1.5;
+    color: #fff; min-height: 60px; transition: opacity .25s ease; opacity: 0;
+  }
+  .info-global.show { opacity: 1; }
+
+  /* === MOBILE === */
+  .m-utility { display: none; }
+
+  @media (max-width: 768px) {
+    .stage { display: none !important; }
+    .m-utility { display: block !important; }
+    html, body { height: auto; overflow-y: auto; }
+    .top-bar { height: 48px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(0,0,0,0.92); border-bottom: 1px solid rgba(253,194,2,0.15); }
+    .menu-wrapper { gap: 12px; padding: 0 12px; justify-content: space-between; width: 100%; }
+    .menu-left, .menu-right { gap: 4px; }
+    .menu-left a, .menu-right a { font-size: 0.6rem; padding: 4px 6px; }
+    .logo-center { height: 38px; }
+  }
+
+  /* Mobile utility styles */
+  .m-util-hero { padding: 70px 24px 30px; text-align: center;
+    background: linear-gradient(180deg, rgba(0,0,0,0.6), #0b0b0b),
+                url('./images/utilitybg.png') center/cover no-repeat;
+    min-height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .m-util-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #ffd200; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .m-util-sub { font-size: 0.85rem; color: #b0b0b0; max-width: 320px; line-height: 1.5; }
+  .m-util-card { width: 280px; height: 190px; perspective: 800px; margin: 24px auto; }
+  .m-util-card-inner { width: 100%; height: 100%; transform-style: preserve-3d; animation: mUtilFlip 8s ease-in-out infinite; }
+  .m-util-card-face { position: absolute; width: 100%; height: 100%; border-radius: 12px; backface-visibility: hidden; background-size: contain; background-position: center; background-repeat: no-repeat; overflow: hidden; }
+  .m-util-card-front { background-image: url('./images/card.jpg'); box-shadow: 0 16px 48px rgba(253,194,2,0.15), 0 6px 20px rgba(0,0,0,0.5); }
+  .m-util-card-back { background-image: url('./images/card2.jpg'); transform: rotateY(180deg); box-shadow: 0 16px 48px rgba(253,194,2,0.15), 0 6px 20px rgba(0,0,0,0.5); }
+  .m-util-shine { position: absolute; inset: 0; border-radius: 12px; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.12) 55%, transparent 70%); pointer-events: none; animation: mUtilShine 8s ease-in-out infinite; z-index: 2; }
+  @keyframes mUtilFlip {
+    0% { transform: rotateY(0deg) rotateX(3deg) translateY(0); }
+    15% { transform: rotateY(20deg) rotateX(-2deg) translateY(-6px); }
+    30% { transform: rotateY(0deg) rotateX(3deg) translateY(0); }
+    45% { transform: rotateY(180deg) rotateX(-2deg) translateY(-8px); }
+    60% { transform: rotateY(180deg) rotateX(3deg) translateY(0); }
+    75% { transform: rotateY(200deg) rotateX(-2deg) translateY(-6px); }
+    90% { transform: rotateY(360deg) rotateX(3deg) translateY(0); }
+    100% { transform: rotateY(360deg) rotateX(3deg) translateY(0); }
+  }
+  @keyframes mUtilShine {
+    0%, 100% { transform: translateX(-100%); }
+    40%, 50% { transform: translateX(100%); }
+    51%, 89% { transform: translateX(-100%); }
+    90% { transform: translateX(100%); }
+  }
+  .m-util-features { padding: 20px 20px 60px; }
+  .m-util-feature {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,210,0,0.1);
+    border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    opacity: 0; transform: translateY(16px); transition: opacity 0.5s, transform 0.5s;
+  }
+  .m-util-feature.visible { opacity: 1; transform: translateY(0); }
+  .m-util-icon {
+    width: 44px; height: 44px; min-width: 44px; border-radius: 50%; background: #111;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(255,210,0,0.15); color: #ffd200; font-size: 18px;
+  }
+  .m-util-text h3 { margin: 0 0 4px; font-size: 0.85rem; font-weight: 600; color: #fff; }
+  .m-util-text p { margin: 0; font-size: 0.75rem; color: #b0b0b0; line-height: 1.4; }
+</style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="menu-wrapper">
+      <div class="menu-left">
+        <a href="index.html">HOME</a>
+        <a href="about.html">ABOUT</a>
+      </div>
+      <img src="./Fixed Background Scroll_files/logo.webp" alt="Logo" class="logo-center">
+      <div class="menu-right">
+        <a href="utility.html">UTILITY</a>
+        <a href="#">WHITEPAPER</a>
+      </div>
+    </div>
+  </div>
+  <!-- DESKTOP VERSION (original) -->
+  <div class="stage">
+    <div class="card-wrap" id="cardWrap">
+      <div class="ring"></div>
+      <div class="card"><img src="./images/card.jpg" alt="Card"></div>
+      <button class="icon pos-top animate" data-info="The card empowers the community by bringing members together as a family, with each member receiving both an NFT and a physical card that unlocks exclusive privileges and opportunities." style="animation-delay:0.15s"><i class="fa-solid fa-heart"></i></button>
+      <button class="icon pos-right1 animate" data-info="A card is required to claim any newly released gifts or IRL items, allowing the item's price to be reduced to $0." style="animation-delay:0.30s"><i class="fa-solid fa-gift"></i></button>
+      <button class="icon pos-right2 animate" data-info="Cardholders have the privilege to submit requests for roles as actors or for any other positions, with their applications receiving priority consideration." style="animation-delay:0.45s"><i class="fa-solid fa-film"></i></button>
+      <button class="icon pos-left1 animate" data-info="An IP license for all soundtracks used in the WINGMEN series, granting you full and unrestricted rights to use them at your discretion." style="animation-delay:0.60s"><i class="fa-solid fa-music"></i></button>
+      <button class="icon pos-left2 animate" data-info="The card can be used as a credit card, and at our special launches and events, you are authorized to use your WMC coins through this card." style="animation-delay:0.75s"><i class="fa-solid fa-credit-card"></i></button>
+      <button class="icon pos-bottom animate" data-info="Cardholders will earn WMC coins through airdrops, proportional to their engagement and activity within the community." style="animation-delay:0.90s"><i class="fa-solid fa-coins"></i></button>
+    </div>
+    <div class="info-global" id="infoGlobal"></div>
+  </div>
+
+  <!-- MOBILE VERSION -->
+  <div class="m-utility">
+    <div class="m-util-hero">
+      <h1 class="m-util-title">CARD UTILITY</h1>
+      <p class="m-util-sub">Your NFT card is more than a collectible — it's your key to the Wingmen universe</p>
+      <div class="m-util-card">
+        <div class="m-util-card-inner">
+          <div class="m-util-card-face m-util-card-front"><div class="m-util-shine"></div></div>
+          <div class="m-util-card-face m-util-card-back"><div class="m-util-shine"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="m-util-features">
+      <div class="m-util-feature">
+        <div class="m-util-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="m-util-text"><h3>Community & Family</h3><p>Each member receives both an NFT and a physical card that unlocks exclusive privileges and opportunities.</p></div>
+      </div>
+      <div class="m-util-feature">
+        <div class="m-util-icon"><i class="fa-solid fa-gift"></i></div>
+        <div class="m-util-text"><h3>Free IRL Gifts</h3><p>A card is required to claim any newly released gifts or IRL items, allowing the item's price to be reduced to $0.</p></div>
+      </div>
+      <div class="m-util-feature">
+        <div class="m-util-icon"><i class="fa-solid fa-film"></i></div>
+        <div class="m-util-text"><h3>Priority Casting</h3><p>Cardholders have the privilege to submit requests for roles as actors or for any other positions, with priority consideration.</p></div>
+      </div>
+      <div class="m-util-feature">
+        <div class="m-util-icon"><i class="fa-solid fa-music"></i></div>
+        <div class="m-util-text"><h3>IP License</h3><p>An IP license for all soundtracks used in the WINGMEN series, granting you full and unrestricted rights to use them.</p></div>
+      </div>
+      <div class="m-util-feature">
+        <div class="m-util-icon"><i class="fa-solid fa-credit-card"></i></div>
+        <div class="m-util-text"><h3>WMC Credit Card</h3><p>The card can be used as a credit card, and at special launches and events, you are authorized to use your WMC coins through this card.</p></div>
+      </div>
+      <div class="m-util-feature">
+        <div class="m-util-icon"><i class="fa-solid fa-coins"></i></div>
+        <div class="m-util-text"><h3>Airdrops & Rewards</h3><p>Cardholders will earn WMC coins through airdrops, proportional to their engagement and activity within the community.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Desktop hover info
+    const icons = document.querySelectorAll('.icon');
+    const infoGlobal = document.getElementById('infoGlobal');
+    function showInfo(txt) { if(infoGlobal) { infoGlobal.textContent = txt; infoGlobal.classList.add('show'); } }
+    function hideInfo() { if(infoGlobal) { infoGlobal.classList.remove('show'); setTimeout(()=>{ if(!infoGlobal.classList.contains('show')) infoGlobal.textContent=''; }, 200); } }
+    icons.forEach(icon => {
+      icon.addEventListener('mouseenter', () => showInfo(icon.dataset.info));
+      icon.addEventListener('mouseleave', hideInfo);
+      icon.addEventListener('click', () => showInfo(icon.dataset.info));
+    });
+    // Mobile fade-in
+    var fObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.m-util-feature').forEach(function(el) { fObs.observe(el); });
+    setTimeout(function() { document.querySelectorAll('.m-util-feature').forEach(function(el) { el.classList.add('visible'); }); }, 2000);
+  </script>
+</body>
+</html>

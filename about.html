@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>About Wingmen</title>
+<link rel="icon" type="image/webp" href="./Fixed Background Scroll_files/logo.webp">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Inter', Arial, sans-serif; color: white; }
+  .about-container {
+    position: relative; height: 100vh; width: 100%;
+    background: url('./images/aboutbg.png') no-repeat center center/cover;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  }
+  .about-container::after {
+    content: ""; position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%); z-index: 1;
+  }
+  .top-bar {
+    position: fixed; top: 0; left: 0; width: 100%; height: 50px;
+    background: rgb(0,0,0); display: flex; align-items: center;
+    justify-content: center; padding: 0; z-index: 5; box-sizing: border-box;
+  }
+  .menu-wrapper { display: flex; align-items: center; gap: 60px; }
+  .menu-left, .menu-right { display: flex; gap: 20px; }
+  .logo-center { height: 70px; }
+  .menu-left a, .menu-right a {
+    color: white; text-decoration: none; font-weight: bold; font-size: 0.8rem;
+    padding: 5px 10px; border-radius: 5px; transition: color 0.3s;
+  }
+  .menu-left a:hover, .menu-right a:hover { color: rgb(255,196,0); }
+  .title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 3rem; font-weight: bold;
+    margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; z-index: 2;
+  }
+  .description {
+    font-size: 1.3rem; max-width: 800px; line-height: 1.6; padding: 0 20px;
+    opacity: 0; transform: translateY(20px); animation: fadeUp 2s ease forwards; animation-delay: 0.5s; z-index: 2;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .partners { position: absolute; bottom: 30px; width: 100%; text-align: center; font-size: 1.2rem; font-weight: bold; z-index: 2; }
+
+  /* === MOBILE === */
+  @media (max-width: 768px) {
+    .top-bar { height: 48px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(0,0,0,0.92); border-bottom: 1px solid rgba(253,194,2,0.15); }
+    .menu-wrapper { gap: 12px; padding: 0 12px; justify-content: space-between; width: 100%; }
+    .menu-left, .menu-right { gap: 4px; }
+    .menu-left a, .menu-right a { font-size: 0.6rem; padding: 4px 6px; }
+    .logo-center { height: 38px; }
+    .title { font-size: 2rem; letter-spacing: 1px; margin-bottom: 12px; padding: 0 16px; }
+    .description { font-size: 0.95rem; line-height: 1.5; padding: 0 24px; max-width: 100%; }
+    .about-container { padding: 60px 0 40px; }
+  }
+</style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="menu-wrapper">
+      <div class="menu-left">
+        <a href="index.html">HOME</a>
+        <a href="about.html">ABOUT</a>
+      </div>
+      <img src="./Fixed Background Scroll_files/logo.webp" alt="Logo" class="logo-center">
+      <div class="menu-right">
+        <a href="utility.html">UTILITY</a>
+        <a href="#">WHITEPAPER</a>
+      </div>
+    </div>
+  </div>
+  <div class="about-container">
+    <div class="title">ABOUT WINGMEN</div>
+    <div class="description">
+      This is an innovative Crypto Series where each NFT is your exclusive ticket to a whole new kind of television experience.
+      Holders are not just viewers – they become characters, co-writers of the storyline, and active participants through voting.
+      The show will be produced by a team with over 20+ years of filmmaking experience.
+    </div>
+    <div class="partners"></div>
+  </div>
+</body>
+</html>
